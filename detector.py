@@ -1,7 +1,20 @@
+"""
+Module: detector.py
+# Information:
+#   Author: Valentin Böse
+#   Created: 2025-11-12
+#   Last Modified: 2025-11-13
+#   Purpose: Detect human pose landmarks in video files using MediaPipe Pose Landmarker,
+#            annotate frames with landmarks, write an annotated video and a JSON file
+#            containing per-frame landmark detections.
+#
+"""
+
 import cv2
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 import numpy as np
+from typing import Tuple
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import mediapipe as mp
@@ -9,7 +22,17 @@ import json
 import os
 
 
-def draw_landmarks_on_image(rgb_image, detection_result):
+def draw_landmarks_on_image(rgb_image: np.ndarray, detection_result: any) -> np.ndarray:
+  """Draw the detected landmarks to the image.
+
+  Args:
+      rgb_image (np.ndarray): image to draw on
+      detection_result (any): detection result from the posture detection model
+
+  Returns:
+      np.ndarray: annotated image
+  """
+
   pose_landmarks_list = detection_result.pose_landmarks
   annotated_image = np.copy(rgb_image)
 
@@ -33,7 +56,17 @@ def draw_landmarks_on_image(rgb_image, detection_result):
   return annotated_image
 
 
-def process_video(video_path, annotated_path):
+def process_video(video_path: str, annotated_path: str) -> Tuple[str, str]:
+  """Processes video from a given path with posture landmarks. Writes to the annotated path.
+
+  Args:
+      video_path (str): original video
+      annotated_path (str): output path
+
+  Returns:
+      Tuple[str, str]: path to result video, path to json with landmarks
+  """
+
   cap = cv2.VideoCapture(video_path)
 
   base_options = python.BaseOptions(model_asset_path='/root/projects/03_posture_detection/pose_landmarker_full.task')
