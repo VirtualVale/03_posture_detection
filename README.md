@@ -5,6 +5,8 @@ The main goal is to **analyze posture during front squats and deadlifts** — a 
 
 ---
 
+![annotated image](https://github.com/VirtualVale/03_posture_detection/blob/main/annotated_image.jpg)
+
 ## 🎯 Project Overview
 
 This project demonstrates:
