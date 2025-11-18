@@ -22,22 +22,9 @@ import json
 import os
 
 
-def draw_landmarks_on_image(rgb_image: np.ndarray, detection_result: any) -> np.ndarray:
-  """Draw the detected landmarks to the image.
-
-  Args:
-      rgb_image (np.ndarray): image to draw on
-      detection_result (any): detection result from the posture detection model
-
-  Returns:
-      np.ndarray: annotated image
-  """
-
+def draw_landmarks_on_image(rgb_image, detection_result):
   pose_landmarks_list = detection_result.pose_landmarks
   annotated_image = np.copy(rgb_image)
-
-  if not pose_landmarks_list:
-    return annotated_image
 
   # Loop through the detected poses to visualize.
   for idx in range(len(pose_landmarks_list)):
@@ -53,6 +40,56 @@ def draw_landmarks_on_image(rgb_image: np.ndarray, detection_result: any) -> np.
       pose_landmarks_proto,
       solutions.pose.POSE_CONNECTIONS,
       solutions.drawing_styles.get_default_pose_landmarks_style())
+    if pose_landmarks[23]:
+      
+
+      x1 = pose_landmarks[23].x
+      y1 = pose_landmarks[23].y
+      x2 = pose_landmarks[24].x
+      y2 = pose_landmarks[24].y
+
+      x_dist = abs(x1 - x2)
+      y_dist = abs(y1 - y2)
+
+      rad = np.atan(y_dist/x_dist)
+      degree = int(np.rad2deg(rad))
+
+
+      # font
+      font = cv2.FONT_HERSHEY_SIMPLEX
+
+      # org
+      org = (50, 50)
+
+      # fontScale
+      fontScale = 1
+      
+      # Blue color in BGR
+      def angle_to_color(angle_deg):
+          """
+          Maps an angle from 0 to 90 degrees to a color from light blue → light red.
+          Output format: (B, G, R)
+          """
+
+          # Clamp angle into 0–90
+          a = np.clip(angle_deg, 0, 90) / 90.0  # normalized to 0..1
+
+          # Define start and end colors (B, G, R)
+          light_blue = np.array([255, 200, 100], dtype=np.float32)
+          light_red  = np.array([100, 150, 255], dtype=np.float32)
+
+          # Linear interpolation
+          color = (1 - a) * light_blue + a * light_red
+
+          # Return as tuple (0,0,0)
+          return (int(color[0]), int(color[1]), int(color[2]))
+      
+      color = angle_to_color(degree)
+
+      # Line thickness of 2 px
+      thickness = 2
+      annotated_image = cv2.putText(annotated_image, f'hip angle: {degree} degree', org, fontFace=font, fontScale=fontScale, color=color, thickness=thickness)
+    
   return annotated_image
 
 
@@ -69,7 +106,7 @@ def process_video(video_path: str, annotated_path: str) -> Tuple[str, str]:
 
   cap = cv2.VideoCapture(video_path)
 
-  base_options = python.BaseOptions(model_asset_path='/root/projects/03_posture_detection/pose_landmarker_full.task')
+  base_options = python.BaseOptions(model_asset_path='/root/models/pose_landmarker_full.task')
   options = vision.PoseLandmarkerOptions(
       base_options=base_options,
       output_segmentation_masks=True)
